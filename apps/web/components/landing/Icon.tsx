@@ -91,7 +91,28 @@ export type IconName =
   | 'flag'
   | 'error'
   | 'forum'
-  | 'camera_alt';
+  | 'camera_alt'
+  | 'grid_view'
+  | 'hotel_class'
+  | 'analytics'
+  | 'smart_toy'
+  | 'chair'
+  | 'event_seat'
+  | 'groups'
+  | 'mop'
+  | 'alarm_on'
+  | 'speed'
+  | 'sync'
+  | 'edit_note'
+  | 'nest_clock_farsight_analog'
+  | 'psychology'
+  | 'unfold_more'
+  | 'left_panel_close'
+  | 'block'
+  | 'report_problem'
+  | 'construction'
+  | 'cleaning_services'
+  | 'notification_important';
 
 type IconProps = {
   name: IconName;
