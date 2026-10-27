@@ -1,0 +1,368 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PLATFORM_ADMIN
+  RESTAURANT_OWNER
+  RESTAURANT_MANAGER
+  WAITER
+  KITCHEN_STAFF
+  CUSTOMER
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+}
+
+enum TableStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+}
+
+enum OrderStatus {
+  CREATED
+  PAYMENT_PENDING
+  CONFIRMED
+  ACCEPTED
+  PREPARING
+  READY
+  ASSIGNED
+  SERVED
+  COMPLETED
+  CANCELLED
+  REFUNDED
+  FAILED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum SubscriptionPlanName {
+  FREE
+  GROWTH
+  PRO
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIAL
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+model Tenant {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  restaurants Restaurant[]
+  members     RestaurantMember[]
+  subscriptions Subscription[]
+}
+
+model User {
+  id                  String              @id @default(cuid())
+  email               String              @unique
+  name                String
+  passwordHash        String
+  role                UserRole            @default(CUSTOMER)
+  avatarUrl           String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  memberships         RestaurantMember[]
+  restaurantOrders    Order[]
+  tableSessions       TableSession[]
+  reviews             Review[]
+  notifications       Notification[]
+}
+
+model RestaurantMember {
+  id          String            @id @default(cuid())
+  userId      String
+  tenantId    String
+  restaurantId String
+  role        UserRole
+  status      MembershipStatus @default(ACTIVE)
+  joinedAt    DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id])
+  tenant      Tenant @relation(fields: [tenantId], references: [id])
+  restaurant  Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@unique([userId, restaurantId])
+}
+
+model Restaurant {
+  id              String        @id @default(cuid())
+  tenantId        String
+  name            String
+  slug            String
+  description     String?
+  logoUrl         String?
+  primaryColor    String?
+  accentColor     String?
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  tenant          Tenant        @relation(fields: [tenantId], references: [id])
+  members         RestaurantMember[]
+  tables          Table[]
+  categories      Category[]
+  menuItems       MenuItem[]
+  orders          Order[]
+  payments        Payment[]
+  reviews         Review[]
+  subscriptions   Subscription[]
+  settings        RestaurantSetting?
+
+  @@unique([tenantId, slug])
+}
+
+model RestaurantSetting {
+  id                 String   @id @default(cuid())
+  restaurantId       String   @unique
+  allowDineIn        Boolean  @default(true)
+  allowTakeaway      Boolean  @default(true)
+  allowDelivery      Boolean  @default(false)
+  taxRate            Decimal? @db.Decimal(10, 2)
+  serviceCharge      Decimal? @db.Decimal(10, 2)
+  minimumOrderValue  Decimal? @db.Decimal(10, 2)
+  showIngredients    Boolean  @default(true)
+  showCalories       Boolean  @default(true)
+  showAllergens      Boolean  @default(true)
+  enableRecommendations Boolean @default(true)
+  enableAiAssistant  Boolean  @default(false)
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model Table {
+  id           String      @id @default(cuid())
+  restaurantId String
+  number       String
+  label        String?
+  location     String?
+  status       TableStatus @default(AVAILABLE)
+  capacity     Int         @default(4)
+  createdAt    DateTime    @default(now())
+
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+  sessions     TableSession[]
+
+  @@unique([restaurantId, number])
+}
+
+model TableSession {
+  id             String     @id @default(cuid())
+  restaurantId   String
+  tableId        String
+  customerId     String?
+  sessionToken   String     @unique
+  status         String     @default("ACTIVE")
+  startedAt      DateTime   @default(now())
+  endedAt        DateTime?
+
+  table          Table      @relation(fields: [tableId], references: [id])
+  customer       User?      @relation(fields: [customerId], references: [id])
+  orders         Order[]
+}
+
+model Category {
+  id            String     @id @default(cuid())
+  restaurantId  String
+  name          String
+  description   String?
+  sortOrder     Int        @default(0)
+  isActive      Boolean    @default(true)
+
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+  menuItems     MenuItem[]
+}
+
+model MenuItem {
+  id              String          @id @default(cuid())
+  restaurantId    String
+  categoryId      String
+  name            String
+  description     String?
+  price           Decimal         @db.Decimal(10, 2)
+  imageUrl        String?
+  isAvailable     Boolean         @default(true)
+  isVegetarian    Boolean         @default(true)
+  spiceLevel      Int             @default(0)
+  prepTimeMinutes Int            @default(10)
+  calories        Int?
+  ingredients     String[]
+  allergens       String[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  restaurant     Restaurant      @relation(fields: [restaurantId], references: [id])
+  category        Category        @relation(fields: [categoryId], references: [id])
+  orderItems      OrderItem[]
+  optionGroups    MenuItemOptionGroup[]
+}
+
+model MenuItemOptionGroup {
+  id          String           @id @default(cuid())
+  menuItemId  String
+  name        String
+  required    Boolean          @default(false)
+  maxChoices  Int              @default(1)
+
+  menuItem    MenuItem         @relation(fields: [menuItemId], references: [id])
+  options     MenuItemOption[]
+}
+
+model MenuItemOption {
+  id              String               @id @default(cuid())
+  optionGroupId   String
+  name            String
+  price           Decimal              @db.Decimal(10, 2)
+  isDefault       Boolean              @default(false)
+
+  optionGroup     MenuItemOptionGroup @relation(fields: [optionGroupId], references: [id])
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  restaurantId  String
+  tableSessionId String?
+  customerId    String?
+  status        OrderStatus @default(CREATED)
+  subtotal      Decimal     @db.Decimal(10, 2)
+  tax           Decimal     @db.Decimal(10, 2)
+  serviceCharge Decimal     @db.Decimal(10, 2)
+  total         Decimal     @db.Decimal(10, 2)
+  note          String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  restaurant    Restaurant  @relation(fields: [restaurantId], references: [id])
+  tableSession   TableSession? @relation(fields: [tableSessionId], references: [id])
+  customer      User?       @relation(fields: [customerId], references: [id])
+  items         OrderItem[]
+  payments      Payment[]
+  statusHistory OrderStatusHistory[]
+}
+
+model OrderItem {
+  id            String   @id @default(cuid())
+  orderId       String
+  menuItemId    String
+  quantity      Int      @default(1)
+  unitPrice     Decimal  @db.Decimal(10, 2)
+  totalPrice    Decimal  @db.Decimal(10, 2)
+  notes         String?
+
+  order         Order    @relation(fields: [orderId], references: [id])
+  menuItem      MenuItem @relation(fields: [menuItemId], references: [id])
+}
+
+model OrderStatusHistory {
+  id          String      @id @default(cuid())
+  orderId     String
+  status      OrderStatus
+  note        String?
+  createdAt   DateTime    @default(now())
+
+  order       Order       @relation(fields: [orderId], references: [id])
+}
+
+model Payment {
+  id                 String        @id @default(cuid())
+  restaurantId       String
+  orderId            String
+  provider           String        @default("razorpay")
+  providerPaymentId  String?
+  amount             Decimal       @db.Decimal(10, 2)
+  currency           String        @default("INR")
+  status             PaymentStatus @default(PENDING)
+  statusReason       String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  restaurant         Restaurant    @relation(fields: [restaurantId], references: [id])
+  order              Order         @relation(fields: [orderId], references: [id])
+}
+
+model Review {
+  id            String    @id @default(cuid())
+  restaurantId  String
+  customerId    String
+  rating        Int
+  comment       String?
+  createdAt     DateTime  @default(now())
+
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+  customer      User       @relation(fields: [customerId], references: [id])
+}
+
+model SubscriptionPlan {
+  id          String               @id @default(cuid())
+  name        SubscriptionPlanName @unique
+  price       Decimal              @db.Decimal(10, 2)
+  maxBranches Int                 @default(1)
+  maxTables   Int                 @default(50)
+  features    String[]
+  createdAt   DateTime             @default(now())
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id             String            @id @default(cuid())
+  tenantId       String
+  restaurantId   String?
+  planId         String
+  status         SubscriptionStatus @default(TRIAL)
+  startedAt      DateTime          @default(now())
+  endsAt         DateTime?
+  cancelledAt    DateTime?
+
+  tenant         Tenant            @relation(fields: [tenantId], references: [id])
+  restaurant     Restaurant?       @relation(fields: [restaurantId], references: [id])
+  plan           SubscriptionPlan  @relation(fields: [planId], references: [id])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String?
+  type        String
+  title       String
+  message     String
+  isRead      Boolean  @default(false)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id])
+}
+
+model AiRequestLog {
+  id           String   @id @default(cuid())
+  restaurantId String?
+  userId       String?
+  requestType  String
+  prompt       String
+  response     String?
+  model        String?
+  latencyMs    Int?
+  costUsd      Decimal? @db.Decimal(10, 6)
+  createdAt    DateTime @default(now())
+}

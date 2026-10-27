@@ -1,0 +1,18 @@
+{
+  "name": "dineflow",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,api -c cyan,magenta \"npm run dev --workspace @dineflow/web\" \"npm run dev --workspace @dineflow/api\"",
+    "dev:web": "npm run dev --workspace @dineflow/web",
+    "dev:api": "npm run dev --workspace @dineflow/api",
+    "build": "npm run build --workspace @dineflow/web && npm run build --workspace @dineflow/api",
+    "lint:web": "npm run lint --workspace @dineflow/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}
