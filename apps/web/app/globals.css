@@ -1797,8 +1797,27 @@ svg {
 .owner-app.sidebar-collapsed .owner-brand-copy,
 .owner-app.sidebar-collapsed .owner-role-badge,
 .owner-app.sidebar-collapsed .owner-nav-heading,
-.owner-app.sidebar-collapsed .owner-nav-label {
-  display: none;
+.owner-app.sidebar-collapsed .owner-nav-label,
+.owner-app.sidebar-collapsed .owner-workspace-label span {
+  display: none !important;
+}
+
+.owner-app.sidebar-collapsed .owner-workspace-label {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.owner-app.sidebar-collapsed .owner-sidebar-actions {
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.owner-app.sidebar-collapsed .owner-sidebar-actions > a,
+.owner-app.sidebar-collapsed .owner-collapse-button {
+  width: 100%;
+  justify-content: center;
+  min-width: 2.5rem;
+  padding: 0.5rem 0;
 }
 
 .owner-app.sidebar-collapsed .owner-navigation {
@@ -2121,44 +2140,51 @@ svg {
   color: var(--color-primary-text);
 }
 
-@media (max-width: 1023px) {
-  .owner-app {
+@media (max-width: 1023px) and (min-width: 768px) {
+  .owner-app.sidebar-collapsed {
     --owner-sidebar-width: 4.75rem;
   }
 
-  .owner-sidebar-top {
+  .owner-app:not(.sidebar-collapsed) {
+    --owner-sidebar-width: 16.5rem;
+  }
+
+  .owner-app.sidebar-collapsed .owner-sidebar-top {
     justify-content: center;
     padding-right: 0.5rem;
     padding-left: 0.5rem;
   }
 
-  .owner-brand {
+  .owner-app.sidebar-collapsed .owner-brand {
     flex: 0 0 auto;
   }
 
-  .owner-brand-copy,
-  .owner-role-badge,
-  .owner-nav-heading,
-  .owner-nav-label {
-    display: none;
+  .owner-app.sidebar-collapsed .owner-brand-copy,
+  .owner-app.sidebar-collapsed .owner-role-badge,
+  .owner-app.sidebar-collapsed .owner-nav-heading,
+  .owner-app.sidebar-collapsed .owner-nav-label,
+  .owner-app.sidebar-collapsed .owner-workspace-label span {
+    display: none !important;
   }
 
-  .owner-navigation {
+  .owner-app.sidebar-collapsed .owner-navigation {
     padding-right: 0.5rem;
     padding-left: 0.5rem;
   }
 
-  .owner-nav-link {
+  .owner-app.sidebar-collapsed .owner-nav-link {
     justify-content: center;
     padding: 0.5rem;
   }
 
-  .owner-workspace-label {
+  .owner-app.sidebar-collapsed .owner-workspace-label {
     justify-content: center;
+    padding: 0.5rem;
   }
 
-  .owner-sidebar-actions {
+  .owner-app.sidebar-collapsed .owner-sidebar-actions {
     flex-direction: column;
+    gap: 0.5rem;
   }
 
   .owner-main {

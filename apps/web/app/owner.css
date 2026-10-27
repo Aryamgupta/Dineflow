@@ -763,6 +763,209 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
+/* Topbar Interactive Components & Dropdowns */
+.owner-topbar-relative {
+  position: relative;
+}
+
+.owner-profile-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.owner-profile-trigger:hover {
+  background: var(--color-surface-low);
+  border-color: var(--color-border);
+}
+
+.owner-avatar-initials {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.owner-profile-meta {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  line-height: 1.2;
+}
+
+.owner-profile-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.owner-profile-role {
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+}
+
+.owner-topbar-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 90;
+  width: 17.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: 0 10px 25px -5px rgba(14, 56, 43, 0.16), 0 8px 10px -6px rgba(14, 56, 43, 0.08);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  animation: ownerToastIn 140ms ease;
+}
+
+.owner-dropdown-header {
+  padding: 0.75rem 0.85rem;
+  background: var(--color-surface-low);
+  border-radius: calc(var(--radius-card) - 4px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.owner-dropdown-header strong {
+  font-size: 0.8125rem;
+  color: var(--color-text);
+}
+
+.owner-dropdown-header small {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+}
+
+.owner-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-control);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text);
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.owner-dropdown-item:hover {
+  background: var(--color-surface-low);
+  color: var(--color-primary);
+}
+
+.owner-dropdown-item-danger:hover {
+  background: var(--color-danger-surface);
+  color: var(--color-danger);
+}
+
+.owner-dropdown-divider {
+  height: 1px;
+  background: var(--color-border-soft);
+  margin: 0.35rem 0;
+}
+
+/* Notification Badge on Bell */
+.owner-notification-badge {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.2rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-danger);
+  color: #ffffff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--color-surface);
+}
+
+/* Policy Document Preview */
+.owner-policy-preview-sheet {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-control);
+  padding: 1.5rem;
+  line-height: 1.7;
+  font-size: 0.8125rem;
+  color: var(--color-text);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.owner-policy-preview-sheet h4 {
+  margin: 0 0 0.5rem;
+  color: var(--color-primary);
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+}
+
+.owner-policy-clause {
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--color-primary);
+}
+
+/* Responsive Topbar Rules to prevent overlap at all resolutions */
+@media (max-width: 1300px) {
+  .owner-breadcrumb-trail {
+    display: none;
+  }
+  .owner-search {
+    width: clamp(10rem, 16vw, 14rem);
+  }
+}
+
+@media (max-width: 1100px) {
+  .owner-profile-meta {
+    display: none;
+  }
+  .owner-restaurant-selector {
+    max-width: 11rem;
+  }
+  .owner-restaurant-selector > span:nth-child(2) {
+    max-width: 7.5rem;
+  }
+  .owner-search {
+    width: clamp(8rem, 12vw, 11rem);
+  }
+}
+
+@media (max-width: 900px) {
+  .owner-search {
+    display: none;
+  }
+  .owner-restaurant-selector {
+    max-width: 9.5rem;
+  }
+}
+
 @media (max-width: 768px) {
   .owner-form-grid {
     grid-template-columns: 1fr;
@@ -777,5 +980,9 @@
     flex-direction: column;
     align-items: flex-start;
   }
+  .owner-profile-meta {
+    display: none;
+  }
 }
+
 

@@ -73,6 +73,7 @@ export function RestaurantPoliciesModule() {
   const [audienceFilter, setAudienceFilter] = useState<'All' | 'Customer' | 'Staff'>('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ackModalTarget, setAckModalTarget] = useState<RestaurantPolicy | null>(null);
+  const [previewTarget, setPreviewTarget] = useState<RestaurantPolicy | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Form state
@@ -229,7 +230,7 @@ export function RestaurantPoliciesModule() {
                     )}
                     <button
                       className="owner-btn owner-btn-sm owner-btn-secondary"
-                      onClick={() => showToast(`Previewing policy ${item.id}`)}
+                      onClick={() => setPreviewTarget(item)}
                       type="button"
                     >
                       Preview
@@ -391,6 +392,108 @@ export function RestaurantPoliciesModule() {
                 type="button"
               >
                 <Icon name="notifications" /> Send Reminder to Pending Staff
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* POLICY PREVIEW MODAL (Image 2 Fix) */}
+      {previewTarget && (
+        <div className="owner-modal-backdrop" role="dialog" aria-modal="true">
+          <div className="owner-modal owner-modal-lg">
+            <div className="owner-modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                <span className={`owner-badge ${previewTarget.audience === 'Customer' ? 'owner-badge-neutral' : 'owner-badge-primary'}`}>
+                  {previewTarget.audience} Policy
+                </span>
+                <h3 style={{ margin: 0 }}>{previewTarget.title}</h3>
+              </div>
+              <button
+                className="owner-modal-close-btn"
+                onClick={() => setPreviewTarget(null)}
+                type="button"
+                aria-label="Close preview modal"
+              >
+                <Icon name="close" />
+              </button>
+            </div>
+
+            <div className="owner-modal-body">
+              <div className="owner-banner owner-banner-info">
+                <Icon name={previewTarget.audience === 'Customer' ? 'touch_app' : 'verified_user'} />
+                <div>
+                  <strong>Live Environment Rendering Context:</strong>{' '}
+                  {previewTarget.audience === 'Customer'
+                    ? 'This policy is displayed to dining guests on their mobile QR ordering screen, booking confirmation emails, and checkout receipts.'
+                    : 'This protocol is displayed to staff upon onboarding and shift check-in. Digital acknowledgement is tracked for health & safety audits.'}
+                </div>
+              </div>
+
+              <div className="owner-policy-preview-sheet">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid var(--color-border-soft)', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
+                  <div>
+                    <h4>{previewTarget.title}</h4>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                      Category: {previewTarget.category} • Identifier: <code>{previewTarget.id}</code>
+                    </span>
+                  </div>
+                  <div style={{ textAlign: 'right', fontSize: '0.75rem' }}>
+                    <span className="owner-badge owner-badge-success">{previewTarget.status}</span>
+                    <div style={{ color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
+                      Version {previewTarget.version} • Effective {previewTarget.lastUpdated}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="owner-policy-clause">
+                  <strong style={{ display: 'block', marginBottom: '0.35rem', color: 'var(--color-primary)' }}>
+                    Section 1: Policy Mandate &amp; Provisions
+                  </strong>
+                  <p style={{ margin: 0, lineHeight: 1.7 }}>
+                    {previewTarget.content}
+                  </p>
+                </div>
+
+                <div className="owner-policy-clause">
+                  <strong style={{ display: 'block', marginBottom: '0.35rem', color: 'var(--color-primary)' }}>
+                    Section 2: Compliance &amp; Operational Enforcement
+                  </strong>
+                  <p style={{ margin: 0, lineHeight: 1.7, color: 'var(--color-text-muted)' }}>
+                    All management, service personnel, and dining patrons agree to uphold the standards described herein. For inquiries or special accommodations, guests may contact restaurant management via the DineFlow concierge portal.
+                  </p>
+                </div>
+
+                {previewTarget.requiresAcknowledgement && (
+                  <div style={{ marginTop: '1.25rem', padding: '1rem', background: 'var(--color-surface-low)', borderRadius: 'var(--radius-control)', border: '1px dashed var(--color-border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                      <Icon name="check_circle" className="text-primary" />
+                      <strong>Mandatory Staff Digital Sign-off:</strong>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                      Current compliance record: {previewTarget.acknowledgedCount ?? 0} of {previewTarget.totalRequired ?? 18} active employees have signed acknowledgment.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="owner-modal-footer">
+              <button
+                className="owner-btn owner-btn-secondary"
+                onClick={() => {
+                  showToast(`Exported ${previewTarget.id} to PDF document.`);
+                }}
+                type="button"
+              >
+                <Icon name="download" /> Export PDF
+              </button>
+              <button
+                className="owner-btn owner-btn-primary"
+                onClick={() => setPreviewTarget(null)}
+                type="button"
+              >
+                Done
               </button>
             </div>
           </div>
