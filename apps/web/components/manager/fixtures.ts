@@ -422,3 +422,360 @@ export const managerOverviewFixtures = {
     { label: 'Recovery Rate', metric: '100%', target: '(2/2 within 10m)', statusVariant: 'success' },
   ] as OperationalBenchmark[],
 };
+
+// ============================================================================
+// Phase 3: Detailed Floor & Kitchen Operational Models
+// ============================================================================
+
+export type KitchenStation = 'All' | 'Hearth & Grill' | 'Sauté & Fish' | 'Raw & Garde-Manger' | 'Pastry & Dessert' | 'Bar & Cellar';
+export type KdsOrderStatus = 'received' | 'in_prep' | 'needs_expedite' | 'plating' | 'ready' | 'served';
+
+export interface OrderItem {
+  id: string;
+  name: string;
+  quantity: number;
+  station: KitchenStation;
+  course: 'Beverage' | 'Appetizer' | 'Entrée' | 'Dessert';
+  modifiers?: string[];
+  allergenAlert?: string;
+  itemStatus: 'pending' | 'cooking' | 'ready';
+}
+
+export interface KdsOrder {
+  id: string;
+  orderNumber: string;
+  table: string;
+  section: string;
+  serverName: string;
+  guestCount: number;
+  orderTime: string;
+  elapsedMinutes: number;
+  targetMinutes: number;
+  status: KdsOrderStatus;
+  items: OrderItem[];
+  priority: 'normal' | 'rush' | 'delayed';
+  chefNotes?: string;
+  specialRequests?: string;
+}
+
+export interface DetailedReservation {
+  id: string;
+  guestName: string;
+  partySize: number;
+  scheduledTime: string;
+  tableId: string;
+  section: 'Main Floor' | 'Mezzanine VIP' | 'Patio Garden';
+  status: 'confirmed' | 'seated' | 'late' | 'cancelled';
+  isVip?: boolean;
+  phone: string;
+  occasion?: string;
+  specialRequests?: string;
+  spendEstimate?: string;
+}
+
+export interface DetailedCleaningTask {
+  id: string;
+  tableId: string;
+  section: 'Main Floor' | 'Mezzanine VIP' | 'Patio Garden';
+  priority: 'Critical' | 'Urgent' | 'Standard';
+  status: 'pending' | 'assigned' | 'in_progress' | 'completed';
+  cleanerName: string;
+  cleanerId: string;
+  assignedAt: string;
+  elapsedMinutes: number;
+  targetMinutes: number;
+  turnaroundTarget: string;
+  checklist: { id: string; label: string; done: boolean }[];
+  sensorTrigger: string;
+}
+
+export const initialKdsOrders: KdsOrder[] = [
+  {
+    id: 'ord-9038',
+    orderNumber: '#DF-9038',
+    table: 'T12',
+    section: 'Main Floor',
+    serverName: 'Julian Rivera',
+    guestCount: 2,
+    orderTime: '19:18',
+    elapsedMinutes: 24,
+    targetMinutes: 18,
+    status: 'needs_expedite',
+    priority: 'delayed',
+    chefNotes: 'Resting beef prior to carving; sauce reduction delayed on station 1',
+    specialRequests: 'VIP 25th Anniversary — Complimentary Truffle Butter pairing',
+    items: [
+      { id: 'i1', name: '45-Day Dry Aged Bone-In Ribeye (18oz)', quantity: 2, station: 'Hearth & Grill', course: 'Entrée', modifiers: ['Medium-Rare', 'Bone Marrow Crust'], itemStatus: 'cooking' },
+      { id: 'i2', name: 'Pan-Roasted Duck Breast with Cherry Jus', quantity: 1, station: 'Hearth & Grill', course: 'Entrée', modifiers: ['Crispy Skin', 'Parsnip Mousseline'], itemStatus: 'ready' },
+      { id: 'i3', name: 'Charred Broccolini with Smoked Sea Salt', quantity: 1, station: 'Sauté & Fish', course: 'Entrée', itemStatus: 'ready' },
+    ],
+  },
+  {
+    id: 'ord-9031',
+    orderNumber: '#DF-9031',
+    table: 'T14',
+    section: 'Main Floor',
+    serverName: 'Julian Rivera',
+    guestCount: 4,
+    orderTime: '19:21',
+    elapsedMinutes: 21,
+    targetMinutes: 18,
+    status: 'needs_expedite',
+    priority: 'delayed',
+    chefNotes: 'Ticket held pending manager allergen protocol check for cross-contact',
+    specialRequests: 'Severe Celiac Disease (Guest 2) — Dedicated cookware used',
+    items: [
+      { id: 'i4', name: 'Pan-Seared Alaskan Halibut', quantity: 2, station: 'Sauté & Fish', course: 'Entrée', allergenAlert: 'CELIAC ALLERGEN', modifiers: ['Gluten-Free Puree', 'Clean Pan Protocol'], itemStatus: 'cooking' },
+      { id: 'i5', name: 'Hand-Cut Prime Beef Tartare', quantity: 2, station: 'Raw & Garde-Manger', course: 'Appetizer', itemStatus: 'ready' },
+      { id: 'i6', name: 'Heirloom Tomato & Burrata Salad', quantity: 2, station: 'Raw & Garde-Manger', course: 'Appetizer', itemStatus: 'ready' },
+    ],
+  },
+  {
+    id: 'ord-9029',
+    orderNumber: '#DF-9029',
+    table: 'T9',
+    section: 'Main Floor',
+    serverName: 'Elena Vance',
+    guestCount: 6,
+    orderTime: '19:22',
+    elapsedMinutes: 20,
+    targetMinutes: 18,
+    status: 'needs_expedite',
+    priority: 'delayed',
+    chefNotes: 'Fresh pasta drop completed; plating final course now',
+    specialRequests: 'Birthday Party — Sparkler on Chocolate Fondant at conclusion',
+    items: [
+      { id: 'i7', name: 'Truffle Tagliatelle with Parmigiano-Reggiano', quantity: 3, station: 'Sauté & Fish', course: 'Entrée', modifiers: ['Extra Truffle Shavings'], itemStatus: 'ready' },
+      { id: 'i8', name: 'Braised Veal Osso Buco with Saffron Risotto', quantity: 2, station: 'Hearth & Grill', course: 'Entrée', itemStatus: 'cooking' },
+      { id: 'i9', name: 'Rosemary Roasted Baby Carrots', quantity: 2, station: 'Sauté & Fish', course: 'Entrée', itemStatus: 'ready' },
+    ],
+  },
+  {
+    id: 'ord-9041',
+    orderNumber: '#DF-9041',
+    table: 'T4',
+    section: 'Main Floor',
+    serverName: 'Elena Vance',
+    guestCount: 4,
+    orderTime: '19:28',
+    elapsedMinutes: 14,
+    targetMinutes: 18,
+    status: 'plating',
+    priority: 'normal',
+    chefNotes: 'Garnish station finishing herb drops',
+    items: [
+      { id: 'i10', name: 'Hamachi Crudo with Yuzu Dressing', quantity: 2, station: 'Raw & Garde-Manger', course: 'Appetizer', itemStatus: 'ready' },
+      { id: 'i11', name: 'Wood-Fired Garlic Focaccia & Whipped Lardo', quantity: 1, station: 'Raw & Garde-Manger', course: 'Appetizer', itemStatus: 'ready' },
+      { id: 'i12', name: 'Pan-Seared Sea Scallops with Cauliflower Puree', quantity: 2, station: 'Sauté & Fish', course: 'Entrée', itemStatus: 'cooking' },
+    ],
+  },
+  {
+    id: 'ord-9045',
+    orderNumber: '#DF-9045',
+    table: 'B2',
+    section: 'Main Floor',
+    serverName: 'Anthony Perez',
+    guestCount: 6,
+    orderTime: '19:34',
+    elapsedMinutes: 8,
+    targetMinutes: 20,
+    status: 'in_prep',
+    priority: 'normal',
+    chefNotes: 'Raw bar shucking live oysters',
+    items: [
+      { id: 'i13', name: 'Cold-Water Oysters on Half Shell (12pc)', quantity: 2, station: 'Raw & Garde-Manger', course: 'Appetizer', modifiers: ['Mignonette', 'Horseradish'], itemStatus: 'cooking' },
+      { id: 'i14', name: 'Ahi Tuna Tartare with Avocado & Sesame Crisp', quantity: 2, station: 'Raw & Garde-Manger', course: 'Appetizer', itemStatus: 'cooking' },
+      { id: 'i15', name: 'Wagyu Burger with Truffle Fries', quantity: 2, station: 'Hearth & Grill', course: 'Entrée', itemStatus: 'pending' },
+    ],
+  },
+  {
+    id: 'ord-9048',
+    orderNumber: '#DF-9048',
+    table: 'P1',
+    section: 'Patio Garden',
+    serverName: 'Elena Vance',
+    guestCount: 4,
+    orderTime: '19:39',
+    elapsedMinutes: 3,
+    targetMinutes: 15,
+    status: 'received',
+    priority: 'rush',
+    specialRequests: 'Patio table requested quick app service',
+    items: [
+      { id: 'i16', name: 'Whipped Ricotta with Lavender Honey & Crostini', quantity: 2, station: 'Raw & Garde-Manger', course: 'Appetizer', itemStatus: 'pending' },
+      { id: 'i17', name: 'Crispy Calamari with Calabrian Chili Aioli', quantity: 2, station: 'Sauté & Fish', course: 'Appetizer', itemStatus: 'pending' },
+    ],
+  },
+  {
+    id: 'ord-9050',
+    orderNumber: '#DF-9050',
+    table: 'M1',
+    section: 'Mezzanine VIP',
+    serverName: 'Marcus Vance',
+    guestCount: 4,
+    orderTime: '19:10',
+    elapsedMinutes: 32,
+    targetMinutes: 30,
+    status: 'ready',
+    priority: 'normal',
+    chefNotes: 'Dessert course ready at pass; call food runner',
+    items: [
+      { id: 'i18', name: 'Warm Valrhona Chocolate Fondant', quantity: 2, station: 'Pastry & Dessert', course: 'Dessert', modifiers: ['Madagascar Vanilla Bean Gelato'], itemStatus: 'ready' },
+      { id: 'i19', name: 'Meyer Lemon Meringue Tartlet', quantity: 2, station: 'Pastry & Dessert', course: 'Dessert', itemStatus: 'ready' },
+      { id: 'i20', name: 'Digestif: 20-Year Tawny Port (Glasses)', quantity: 4, station: 'Bar & Cellar', course: 'Beverage', itemStatus: 'ready' },
+    ],
+  },
+];
+
+export const initialReservations: DetailedReservation[] = [
+  {
+    id: 'res-1',
+    guestName: 'Sophia Chen',
+    partySize: 6,
+    scheduledTime: '19:45',
+    tableId: 'M2',
+    section: 'Mezzanine VIP',
+    status: 'confirmed',
+    isVip: true,
+    phone: '+1 (555) 234-8901',
+    occasion: 'Executive Board Dinner',
+    specialRequests: 'Sommelier cellar pairing requested. Pacing conflict staged to M2.',
+    spendEstimate: '$720',
+  },
+  {
+    id: 'res-2',
+    guestName: 'Mr. Hastings',
+    partySize: 4,
+    scheduledTime: '19:30',
+    tableId: 'T8',
+    section: 'Main Floor',
+    status: 'seated',
+    isVip: false,
+    phone: '+1 (555) 892-1204',
+    occasion: 'Anniversary',
+    specialRequests: 'Quiet corner table preferred.',
+    spendEstimate: '$340',
+  },
+  {
+    id: 'res-3',
+    guestName: 'Dr. Marcus Vance',
+    partySize: 6,
+    scheduledTime: '20:00',
+    tableId: 'B1',
+    section: 'Main Floor',
+    status: 'confirmed',
+    isVip: true,
+    phone: '+1 (555) 304-9988',
+    occasion: 'Medical Faculty Celebration',
+    specialRequests: 'Prefers booth seating; 2 bottles vintage Chianti pre-decanted.',
+    spendEstimate: '$580',
+  },
+  {
+    id: 'res-4',
+    guestName: 'Camila Rodriguez',
+    partySize: 2,
+    scheduledTime: '20:15',
+    tableId: 'T3',
+    section: 'Main Floor',
+    status: 'confirmed',
+    isVip: false,
+    phone: '+1 (555) 441-7722',
+    specialRequests: 'Window seat if available.',
+    spendEstimate: '$190',
+  },
+  {
+    id: 'res-5',
+    guestName: 'The Miller Party',
+    partySize: 4,
+    scheduledTime: '19:30',
+    tableId: 'T7',
+    section: 'Main Floor',
+    status: 'late',
+    isVip: false,
+    phone: '+1 (555) 671-3310',
+    specialRequests: 'Currently waiting in vestibule while T7 is reset.',
+    spendEstimate: '$280',
+  },
+  {
+    id: 'res-6',
+    guestName: 'Oliver Sterling',
+    partySize: 4,
+    scheduledTime: '20:30',
+    tableId: 'P4',
+    section: 'Patio Garden',
+    status: 'confirmed',
+    isVip: false,
+    phone: '+1 (555) 902-4512',
+    specialRequests: 'Outdoor heaters on near patio table 4.',
+    spendEstimate: '$260',
+  },
+];
+
+export const initialDetailedCleaningTasks: DetailedCleaningTask[] = [
+  {
+    id: 'cln-1',
+    tableId: 'T7',
+    section: 'Main Floor',
+    priority: 'Critical',
+    status: 'in_progress',
+    cleanerName: 'Carlos Mendez',
+    cleanerId: 'cln-staff-1',
+    assignedAt: '19:34',
+    elapsedMinutes: 8.4,
+    targetMinutes: 5.0,
+    turnaroundTarget: 'Overdue by +3.4m • The Miller Party (4) waiting in vestibule',
+    sensorTrigger: 'IoT Pressure Mat: Vacated 19:33',
+    checklist: [
+      { id: 'c1', label: 'Clear glassware, plates, and cloth napkins', done: true },
+      { id: 'c2', label: 'Sanitize table surface and chair armrests (EPA Hospital Grade)', done: true },
+      { id: 'c3', label: 'Replace custom linen tablecloth', done: false },
+      { id: 'c4', label: 'Reset polished silverware, water carafes, and fresh QR coaster', done: false },
+      { id: 'c5', label: 'Inspect floor around table for debris', done: false },
+    ],
+  },
+  {
+    id: 'cln-2',
+    tableId: 'P2',
+    section: 'Patio Garden',
+    priority: 'Standard',
+    status: 'pending',
+    cleanerName: 'Unassigned',
+    cleanerId: '',
+    assignedAt: '19:40',
+    elapsedMinutes: 2.5,
+    targetMinutes: 6.0,
+    turnaroundTarget: 'Queued for reset • Next reservation: 20:15',
+    sensorTrigger: 'POS Final Checkout Settled: 19:39',
+    checklist: [
+      { id: 'c6', label: 'Clear outdoor tableware & bar glasses', done: false },
+      { id: 'c7', label: 'Wipe teak wood table and bistro seating', done: false },
+      { id: 'c8', label: 'Reset weatherproof menus & QR coaster', done: false },
+      { id: 'c9', label: 'Check patio heater safety clearance', done: false },
+    ],
+  },
+  {
+    id: 'cln-3',
+    tableId: 'M2',
+    section: 'Mezzanine VIP',
+    priority: 'Urgent',
+    status: 'assigned',
+    cleanerName: 'Maria R.',
+    cleanerId: 'cln-staff-2',
+    assignedAt: '19:41',
+    elapsedMinutes: 1.2,
+    targetMinutes: 5.0,
+    turnaroundTarget: 'VIP Staging for Sophia Chen Executive Dinner (19:45)',
+    sensorTrigger: 'Hostess Fast-Track Dispatch: 19:41',
+    checklist: [
+      { id: 'c10', label: 'Deep sanitize mahogany executive table & leather armchairs', done: true },
+      { id: 'c11', label: 'Set Riedel crystal glassware & linen runners', done: false },
+      { id: 'c12', label: 'Place sommelier reserve wine list & table marker', done: false },
+    ],
+  },
+];
+
+export const availableCleanersList = [
+  { id: 'cln-staff-1', name: 'Carlos Mendez', activeStation: 'Main Floor (T1–T14)', status: 'Active (T7 in progress)' },
+  { id: 'cln-staff-2', name: 'Maria R.', activeStation: 'Mezzanine VIP Suite', status: 'Active (M2 assigned)' },
+  { id: 'cln-staff-3', name: 'Jamal K.', activeStation: 'Patio Garden & Bar', status: 'Available (Idle)' },
+];

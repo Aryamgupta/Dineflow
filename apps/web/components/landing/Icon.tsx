@@ -112,7 +112,12 @@ export type IconName =
   | 'report_problem'
   | 'construction'
   | 'cleaning_services'
-  | 'notification_important';
+  | 'notification_important'
+  | 'hourglass_top'
+  | 'history_toggle_off'
+  | 'file_download'
+  | 'print'
+  | 'soup_kitchen';
 
 type IconProps = {
   name: IconName;
